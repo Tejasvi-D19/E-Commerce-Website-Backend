@@ -63,13 +63,7 @@ public class OrderController {
         }
     }
 	
-	/**
-     * Create payment intent for order
-     * 
-     * @param orderId        Order ID
-     * @param authentication Spring Security authentication
-     * @return Payment intent from Stripe
-     */
+	
 	
     @PostMapping("/{orderId}/payment-intent")
     @PreAuthorize("hasAnyAuthority('Customer','Admin')")
@@ -97,7 +91,7 @@ public class OrderController {
             response.put("Payment URL", session.getUrl());
             response.put("session Id", session.getId());
 
-            //logger.info("Created payment intent {} for order: {}", paymentIntent.getId(), orderId);
+         
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             //logger.error("Unexpected error creating payment intent: {}", e.getMessage());
@@ -105,13 +99,7 @@ public class OrderController {
         }
     }
 
-    /**
-     * Confirm payment for order
-     * 
-     * @param paymentIntentId Stripe payment intent ID
-     * @param authentication  Spring Security authentication
-     * @return Updated order
-     */
+
     @PostMapping("/confirm-payment")
     @PreAuthorize("hasAnyAuthority('Customer','Admin')")
 
@@ -126,25 +114,18 @@ public class OrderController {
                 return ResponseEntity.badRequest().body("Error: You can only confirm payments for your own orders");
             }
 
-            //logger.info("Confirmed payment for order: {}", order.getId());
+           
             return ResponseEntity.ok(order);
         } catch (RuntimeException e) {
-            //logger.error("Failed to confirm payment {}: {}", paymentIntentId, e.getMessage());
+        
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         } catch (Exception e) {
-            //logger.error("Unexpected error confirming payment: {}", e.getMessage());
+    
             return ResponseEntity.internalServerError().body("Error: Failed to confirm payment");
         }
     }
 
-    /**
-     * Get user's orders
-     * 
-     * @param page           Page number
-     * @param size           Page size
-     * @param authentication Spring Security authentication
-     * @return Page of user's orders
-     */
+
     @GetMapping("/my-orders")
     @PreAuthorize("hasAnyAuthority('Customer','Admin')")
     public ResponseEntity<Page<Order>> getMyOrders(
@@ -155,21 +136,15 @@ public class OrderController {
             User user = getCurrentUser(authentication);
             Pageable pageable = PageRequest.of(page, size);
             Page<Order> orders = orderService.getUserOrders(user, pageable);
-            //logger.info("Retrieved {} orders for user: {}", orders.getContent().size(), user.getEmail());
+          
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
-            //logger.error("Failed to retrieve orders: {}", e.getMessage());
+            
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    /**
-     * Get order by ID
-     * 
-     * @param orderId        Order ID
-     * @param authentication Spring Security authentication
-     * @return Order details
-     */
+ 
     @GetMapping("/{orderId}")
     @PreAuthorize("hasAnyAuthority('Customer','Admin')")
 
@@ -191,22 +166,15 @@ public class OrderController {
                 return ResponseEntity.badRequest().build();
             }
 
-            //logger.info("Retrieved order {} for user: {}", orderId, user.getEmail());
+         
             return ResponseEntity.ok(order);
         } catch (Exception e) {
-            //logger.error("Failed to retrieve order {}: {}", orderId, e.getMessage());
+          
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    /**
-     * Get all orders (Admin only)
-     * 
-     * @param page           Page number
-     * @param size           Page size
-     * @param authentication Spring Security authentication
-     * @return Page of all orders
-     */
+  
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('Admin')")
 
@@ -217,10 +185,10 @@ public class OrderController {
         try {
             Pageable pageable = PageRequest.of(page, size);
             Page<Order> orders = orderService.getAllOrders(pageable);
-            //logger.info("Retrieved {} orders for admin", orders.getContent().size());
+           
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
-            //logger.error("Failed to retrieve all orders: {}", e.getMessage());
+           
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -234,13 +202,13 @@ public class OrderController {
             Authentication authentication) {
         try {
             Order updatedOrder = orderService.updateOrderStatus(orderId, status);
-            //logger.info("Updated order {} status to: {}", orderId, status);
+        
             return ResponseEntity.ok(updatedOrder);
         } catch (RuntimeException e) {
-            //logger.error("Failed to update order {} status: {}", orderId, e.getMessage());
+           
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            //logger.error("Unexpected error updating order status: {}", e.getMessage());
+           
             return ResponseEntity.internalServerError().body("Error: Failed to update order status");
         }
     }
