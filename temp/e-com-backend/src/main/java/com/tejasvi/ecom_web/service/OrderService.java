@@ -22,15 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-/**
- * Order Service
- * 
- * Handles order processing and management
- * Manages order creation, payment processing, and order retrieval
- * 
- * @author Tejasvi
- * @version 1.0
- */
 @Service
 @Transactional
 public class OrderService {
@@ -46,12 +37,6 @@ public class OrderService {
     @Autowired
     private StripeUtil stripeUtil;
 
-    /**
-     * Creates an order from the user's cart
-     * 
-     * @param user User creating the order
-     * @return Created order
-     */
     public Order createOrder(User user) {
         // Get user's cart
     	System.out.println("Inside create order service");
@@ -94,21 +79,13 @@ public class OrderService {
         // Clear the cart
         cartService.clearCart(user);
 
-        //logger.info("Created order {} for user: {}", savedOrder.getId(), user.getEmail());
-//        Optional<Long> OItemId = savedOrder.getOrderItems().stream().map(item -> item.getId()).findFirst();
-//        System.out.println(OItemId.toString());
+        
         
         System.out.println("Saving the oreder");
         return orderRepository.save(savedOrder);
     }
 
-    /**
-     * Creates a payment intent for an order
-     * 
-     * @param order Order to create payment intent for
-     * @return PaymentIntent from Stripe
-     * @throws StripeException if payment intent creation fails
-     */
+    
     public Session createSessionCheckout(Order order) throws StripeException {
     	
         String description = "Order #" + order.getId() + " - " + order.getUser().getLoginCredential().getEmail();
@@ -152,47 +129,24 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    /**
-     * Gets all orders for a user
-     * 
-     * @param user     User to get orders for
-     * @param pageable Pagination information
-     * @return Page of user's orders
-     */
+   
     public Page<Order> getUserOrders(User user, Pageable pageable) {
         //logger.info("Fetching orders for user: {}", user.getEmail());
         return orderRepository.findByUserIdWithItems(user.getId(), pageable);
     }
 
-    /**
-     * Gets all orders (admin only)
-     * 
-     * @param pageable Pagination information
-     * @return Page of all orders
-     */
+ 
     public Page<Order> getAllOrders(Pageable pageable) {
         logger.info("Fetching all orders");
         return orderRepository.findAllByOrderByCreatedAtDesc(pageable);
     }
 
-    /**
-     * Gets an order by ID
-     * 
-     * @param orderId Order ID
-     * @return Optional containing order if found
-     */
     public Optional<Order> getOrderById(Long orderId) {
         logger.info("Fetching order with ID: {}", orderId);
         return orderRepository.findById(orderId);
     }
 
-    /**
-     * Updates order status
-     * 
-     * @param orderId Order ID
-     * @param status  New order status
-     * @return Updated order
-     */
+    
     public Order updateOrderStatus(Long orderId, Order.OrderStatus status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
@@ -202,13 +156,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    /**
-     * Updates payment status
-     * 
-     * @param orderId       Order ID
-     * @param paymentStatus New payment status
-     * @return Updated order
-     */
+   
     public Order updatePaymentStatus(Long orderId, Order.PaymentStatus paymentStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
@@ -218,12 +166,6 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    /**
-     * Converts Order entity to OrderDto
-     * 
-     * @param order Order entity
-     * @return OrderDto
-     */
     public OrderDto convertToDto(Order order) {
         Set<OrderDto.OrderItemDto> orderItemDtos = order.getOrderItems().stream()
                 .map(item -> new OrderDto.OrderItemDto(
